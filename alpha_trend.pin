@@ -1,0 +1,38 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// Created & Developed by : Kıvanç Özbilgiç (@KivancOzbilgic)
+// Screener panel & adjustments: @dg_factor
+//@version=5
+indicator("alpha trend", overlay = true)
+
+src = input.source(title='Source', defval=close, group='ALPHATREND')
+AP = input.int(title='Length', defval=14, group='ALPHATREND')
+coeff = input.float(title='Multiplier', defval=1.0, step=0.1, group='ALPHATREND')
+novolumedata = input.bool(title='Change Calculation (No Volume Data)', defval=false, group='ALPHATREND')
+showsignalsk  = input(title='Show Signals ', defval=true, group='ALPHATREND')
+ATR = ta.sma(ta.tr, AP)
+upT = low - ATR * coeff
+downT = high + ATR * coeff
+AlphaTrend = 0.0
+AlphaTrend := (novolumedata ? ta.rsi(src, AP) >= 50 : ta.mfi(hlc3, AP) >= 50) ? upT < nz(AlphaTrend[1]) ? nz(AlphaTrend[1]) : upT : downT > nz(AlphaTrend[1]) ? nz(AlphaTrend[1]) : downT
+color1 = AlphaTrend > AlphaTrend[2] ? #00E60F : AlphaTrend < AlphaTrend[2] ? #80000B : AlphaTrend[1] > AlphaTrend[3] ? #00E60F : #80000B
+buySignalk = ta.crossover(AlphaTrend, AlphaTrend[2])
+sellSignalk = ta.crossunder(AlphaTrend, AlphaTrend[2])
+K1 = ta.barssince(buySignalk)
+K2 = ta.barssince(sellSignalk)
+O1 = ta.barssince(buySignalk[1])
+O2 = ta.barssince(sellSignalk[1])
+direction = 0
+direction := buySignalk and O1 > K2 ? 1 : sellSignalk and O2 > K1 ? -1 : direction[1]
+k1 = plot(AlphaTrend, title='AlphaTrend', color=#0022fc, linewidth=3)
+k2 = plot(AlphaTrend[2], title='Trigger', color=#fc0400, linewidth=3)
+fill(k1, k2, title='Fill Color', color=color1)
+
+buy_cond = showsignalsk and buySignalk and O1 > K2 ? AlphaTrend[2] * 0.9999 : na
+sell_cond = showsignalsk and sellSignalk and O2 > K1 ? AlphaTrend[2] * 1.0001 : na
+
+plotshape(buy_cond, title='BUY', text='BUY', location=location.absolute, style=shape.labelup, size=size.tiny, color=#0022FC, textcolor=color.white)
+plotshape(sell_cond, title='SELL', text='SELL', location=location.absolute, style=shape.labeldown, size=size.tiny, color=color.maroon, textcolor=color.white)
+
+
+if not na(sell_cond)
+    alert("AlphaTrend Signal: SELL, "+ syminfo.tickerid + "(" + str.tostring(close) +")", alert.freq_once_per_bar)
