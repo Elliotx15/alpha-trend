@@ -35,7 +35,7 @@ def barssince(cond: np.ndarray) -> np.ndarray:
     return out
 
 
-def alphatrend(df: pd.DataFrame) -> pd.DataFrame:
+def alphatrend(df: pd.DataFrame, ap: int = AP, coeff: float = COEFF) -> pd.DataFrame:
     high, low, close, volume = df["high"], df["low"], df["close"], df["volume"]
     hlc3 = (high + low + close) / 3
 
@@ -44,7 +44,7 @@ def alphatrend(df: pd.DataFrame) -> pd.DataFrame:
     tr = pd.concat(
         [high - low, (high - prev_close).abs(), (low - prev_close).abs()], axis=1
     ).max(axis=1)
-    atr = tr.rolling(AP).mean()
+    atr = tr.rolling(ap).mean()
 
     # MFI as in Pine ta.mfi: money flow = volume * hlc3, split by sign of change
     change = hlc3.diff()
@@ -54,12 +54,12 @@ def alphatrend(df: pd.DataFrame) -> pd.DataFrame:
     # First bar has na change in Pine, which poisons the first sum window
     pos.iloc[0] = np.nan
     neg.iloc[0] = np.nan
-    upper = pos.rolling(AP).sum()
-    lower = neg.rolling(AP).sum()
+    upper = pos.rolling(ap).sum()
+    lower = neg.rolling(ap).sum()
     mfi = 100 * upper / (upper + lower)
 
-    up_t = low - atr * COEFF
-    down_t = high + atr * COEFF
+    up_t = low - atr * coeff
+    down_t = high + atr * coeff
 
     # Recursive ratchet, nz(AlphaTrend[1]) -> 0 during warmup, same as Pine
     at = np.full(len(df), np.nan)

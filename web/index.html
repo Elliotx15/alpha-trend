@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AlphaTrend</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">AlphaTrend <span class="muted">日线 · 前复权 · 14 / 1.0</span></div>
+  <form id="symbol-form" autocomplete="off">
+    <input id="symbol-input" inputmode="numeric" maxlength="6"
+           placeholder="输入 6 位代码，如 600030" aria-label="股票代码">
+    <button type="submit" id="load-btn">查看</button>
+    <button type="button" id="refresh-btn" title="忽略缓存，重新拉取最新数据">刷新</button>
+  </form>
+</header>
+
+<div id="history" class="chips" hidden></div>
+<div id="latest" class="latest" hidden></div>
+
+<main class="content">
+  <div id="status" class="status" hidden></div>
+  <div id="chart-wrap">
+    <div id="legend" class="legend" hidden>
+      <span class="lg-item lg-sym" id="lg-sym"></span>
+      <span class="lg-item" id="lg-ohlc"></span>
+      <span class="lg-item"><i class="swatch" style="background:#0022fc"></i>AlphaTrend <b id="lg-at">–</b></span>
+      <span class="lg-item"><i class="swatch" style="background:#fc0400"></i>Trigger <b id="lg-tr">–</b></span>
+    </div>
+    <div id="chart"></div>
+  </div>
+  <details id="signal-panel" open hidden>
+    <summary>信号列表 <span id="signal-count" class="muted"></span></summary>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>日期</th><th>方向</th><th>收盘价</th></tr></thead>
+        <tbody id="signal-body"></tbody>
+      </table>
+    </div>
+  </details>
+</main>
+
+<script src="vendor/lightweight-charts.standalone.production.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
